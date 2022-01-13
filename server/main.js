@@ -1,8 +1,10 @@
+// Originally written by devpetrikov for use in Sunshine State RP (discord.gg/ssrp)
+// Modified by zfbx for compatibility with zdiscord
+
 const config = require("./src/queue.config.json");
 
-// Originally written by devpetrikov for use in Sunshine State RP (discord.gg/ssrp)
-
-StopResource("hardcap"); // Stopping the hardcap resource as it will reject connections when the server is full and thus the queue won't work
+// Stopping the hardcap resource as it will reject connections when the server is full and thus the queue won't work
+StopResource("hardcap");
 var msg;
 
 var graceList = [];
@@ -22,7 +24,7 @@ on('playerConnecting', (name, setKickReason, deferrals) => {
     };
     if(!idFound) {
         deferrals.done(config.settings.noDiscordRejectMsg); //rejects the connecting user if they don't have a dicsord ID
-    }    
+    }
     addToQueue(discordIdentifier , src); // add the player to the queue
     var intervalId = setInterval(function () {
         for (let i = 0; i < GetNumPlayerIdentifiers(src); i++) {
@@ -30,7 +32,7 @@ on('playerConnecting', (name, setKickReason, deferrals) => {
             if (identifier.includes('discord:')) {
                 discordIdentifier = identifier.slice(8);
             }
-        } 
+        }
         if (!isUserInQueue(discordIdentifier)) { // stops the interval if the user is no longer in the queue
             clearInterval(intervalId);
         }
@@ -116,7 +118,7 @@ if (config.settings.debug) {
     }, 15000);
 };
 
-function isUserInQueue (identifier) { // Checks if the user is still in the queue 
+function isUserInQueue (identifier) { // Checks if the user is still in the queue
     let b = false;
     for(let i = 0; i < priorityQueue.items.length; i++) {
         if (priorityQueue.items[i].element == identifier) {
@@ -129,7 +131,7 @@ function isUserInQueue (identifier) { // Checks if the user is still in the queu
 function addToQueue (identifier, src) { // adds a user to the queue
     emit('sPerms:getPerms', src, (perms) => {
         userPerms = perms;
-        let prio = config.defaultPrio; 
+        let prio = config.defaultPrio;
         for (let i = 0; i < config.priority_setup.length; i++) {
             let setup = config.priority_setup[i];
             if(userPerms[setup.category][setup.role]) {
@@ -150,7 +152,7 @@ function addToQueue (identifier, src) { // adds a user to the queue
     })
 };
 
-function removeFromQueue(identifier) { // removes a user from the queue 
+function removeFromQueue(identifier) { // removes a user from the queue
     for (var i = 0; i < priorityQueue.items.length; i++) {
         if (priorityQueue.items[i].element == identifier) {
             priorityQueue.items.splice(i, 1);
@@ -247,11 +249,11 @@ class PriorityQueue {
             return "UnderFlow";
         return this.items.shift();
     }
-    
+
     // front function
     front() {
         //returns the highest priority element in the priority queue wightout removing it
-        if (this.isEmpty()) 
+        if (this.isEmpty())
             return "No elements in Queue";
         return this.items[0];
     }
@@ -259,7 +261,7 @@ class PriorityQueue {
     // rear function
     rear() {
         // returns the lowest priority element of the queue
-        if (this.isEmpty()) 
+        if (this.isEmpty())
             return "No elements in Queue";
         return this.items[this.items.length -1];
     }

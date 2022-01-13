@@ -1,13 +1,15 @@
-# pQueue
+# zqueue (fork of pQueue)
 
-This is a FiveM server queue with discord based priority built on [SpaceTheDev](https://github.com/SpaceTheDev/)'s Discord API.
-You **NEED** [sPerms](https://forum.cfx.re/t/release-sperms-real-time-discord-perms/1686063) and [sDiscord](https://forum.cfx.re/t/release-sdiscord/1680021) for this resource to work.
+This is a FiveM server queue with discord based priority built on [VikingTheDev](https://github.com/VikingTheDev/)'s pQueue work to support zdiscord instead.
+You **NEED** [zdiscord](https://github.com/zfbx/zdiscord) for this resource to work.
 
 # Installation
-Copy or download the resource in your resource folder, and add ``ensure pQueue`` to your ``server.cfg``
+Copy or download the resource in your resource folder, and add `ensure zqueue` to your `server.cfg`
+
+<!--
 
 # Config
-The config (`queue.config.json`) file can be found in the ``src`` folder.
+The config (`config.js`) file can be found in the ``src`` folder.
 In the config file you will find three different sections the first being the settings section:
 ```js
 "settings": {
@@ -17,13 +19,13 @@ In the config file you will find three different sections the first being the se
         "graceListTime": 5
     }
 ```
-``debug`` Will enable debug messages in your console, such as: users being added to the queue and their priority, users being removed from the queue and the queue itself.
+`debug` Will enable debug messages in your console, such as: users being added to the queue and their priority, users being removed from the queue and the queue itself.
 
-``alwaysUse`` If set to true the queue will ALWAYS be used, regardless of the number of people in server, this will only allow one user to connect at a time. If set to false the queue will only take effect if there's < 5 open slots.
+`alwaysUse` If set to true the queue will ALWAYS be used, regardless of the number of people in server, this will only allow one user to connect at a time. If set to false the queue will only take effect if there's < 5 open slots.
 
-``noDiscordRejectMsg`` The message presented to a user when rejected for not having a Discord ID.
+`noDiscordRejectMsg` The message presented to a user when rejected for not having a Discord ID.
 
-``graceListTime`` How long a user that has just disconnect/crashed has too reconnect before they will be put at the end of the queue again. (In minutes)
+`graceListTime` How long a user that has just disconnect/crashed has too reconnect before they will be put at the end of the queue again. (In minutes)
 
 
 The next section is for customizing the Adaptive Card UI presented to users while in the queue. Should be obvious what the different settings do, see the screenshot or the comments down below if you are still unsure. 
@@ -109,3 +111,10 @@ Lastly, set ``defaultPrio`` to a higher number than all the priority roles/categ
 
 
 If everything has been done correctly, the script should now work as intended. If you have any issues, feel free to reach out to me on Discord (MightyViking#9126)
+
+-->
+
+# Credit
+
+Great thanks to [VikingTheDev](https://github.com/VikingTheDev/pQueue) ♥ who originally build this resource for use with sDiscord and sPerms under the MIT License before I ported it to use zdiscord.
+This modified version of the resource will also stay open source under MIT for improvements and inspiration to others.
