@@ -2,9 +2,6 @@ const debug = false;
 
 const alwaysUse = false;
 
-// Rejectsion message if discord id could not be found
-const noDiscordRejectMsg = "We could not find your Discord ID, please make sure Discord is running and that you're logged in.";
-
 // Grace period in minutes
 const graceListTime = 2;
 
@@ -49,7 +46,6 @@ const defaultPrio = 4;
 module.exports = {
     debug: getConBool("zqueue_debug", debug),
     alwaysUse: getConBool("zqueue_alwaysuse", alwaysUse),
-    noDiscordRejectMsg: getConvar("zqueue_nodiscordrejectmsg", noDiscordRejectMsg),
     graceListTime: getConvarInt("zqueue_gracetime", graceListTime),
     adaptiveCard: adaptiveCard,
     priority_setup: priority_setup,

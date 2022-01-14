@@ -1,48 +1,27 @@
 // Originally written by devpetrikov for use in Sunshine State RP (discord.gg/ssrp)
 // Modified by zfbx for compatibility with zdiscord
 
-const config = require("./src/queue.config.json");
+const config = require(`${GetResourcePath(GetCurrentResourceName())}/config`);
+const utils = require(`${GetResourcePath("zdiscord")}/server/utils`);
 
-// Stopping the hardcap resource as it will reject connections when the server is full and thus the queue won't work
 StopResource("hardcap");
 let msg;
 
 const graceList = [];
 
 on("playerConnecting", (name, setKickReason, deferrals) => {
-    // stops the user from being connected to the server
-    deferrals.defer();
-    // updates the message on the users screen
-    deferrals.update(`Hello ${name}. Your discord roles are currently being checked...`);
     const src = global.source;
-    let idFound = false;
-    // finds the users discord ID
-    for (let i = 0; i < GetNumPlayerIdentifiers(src); i++) {
-        const identifier = GetPlayerIdentifier(src, i);
 
-        if (identifier.includes("discord:")) {
-            discordIdentifier = identifier.slice(8);
-            idFound = true;
-        }
-    }
-    if (!idFound) {
-        // rejects the connecting user if they don't have a dicsord ID
-        deferrals.done(config.noDiscordRejectMsg);
-    }
-    // add the player to the queue
+    deferrals.defer();
+    deferrals.update(`Hello ${name}. We're putting you in the loading queue`);
+
+    const discordIdentifier = utils.getPlayerDiscordId(src);
     addToQueue(discordIdentifier, src);
-    const intervalId = setInterval(function() {
-        for (let i = 0; i < GetNumPlayerIdentifiers(src); i++) {
-            const identifier = GetPlayerIdentifier(src, i);
-            if (identifier.includes("discord:")) {
-                discordIdentifier = identifier.slice(8);
-            }
-        }
+    const intervalId = setInterval(() => {
         // stops the interval if the user is no longer in the queue
         if (!isUserInQueue(discordIdentifier)) {
-            clearInterval(intervalId);
+            return clearInterval(intervalId);
         }
-        // checks if there is open server slots
         checkQueue((cb) => {
             if (cb == true) {
                 // Checks if there's more than 5 open slots
@@ -93,13 +72,7 @@ on("playerConnecting", (name, setKickReason, deferrals) => {
 
 on("playerDropped", (reason) => {
     const src = global.source;
-    // finds the users discord ID
-    for (let i = 0; i < GetNumPlayerIdentifiers(src); i++) {
-        const identifier = GetPlayerIdentifier(src, i);
-        if (identifier.includes("discord:")) {
-            discordIdentifier = identifier.slice(8);
-        }
-    }
+    const discordIdentifier = utils.getPlayerDiscordId(src);
     graceListInsert(discordIdentifier);
     setTimeout(function() {
         graceListRemove(discordIdentifier);
@@ -108,9 +81,7 @@ on("playerDropped", (reason) => {
 
 // Removes the user in posistion 1 once they have connected to the server
 onNet("zqueue:shiftQueue", () => {
-    if (config.debug) {
-        console.log(`[DEBUG] ${priorityQueue.front().element} has been removed from the queue.`);
-    }
+    debugLog(`${priorityQueue.front().element} has been removed from the queue.`);
     priorityQueue.remove();
 });
 
@@ -118,20 +89,12 @@ onNet("zqueue:shiftQueue", () => {
 setInterval(function removeGhostUsers() {
     for (let i = 0; i < priorityQueue.items.length; i++) {
         if (GetPlayerName(priorityQueue.items[i].source) == null) {
-            if (config.debug) {
-                console.log(`[DEBUG] Removed ghost user: ${priorityQueue.items[i].element}`);
-            }
+            debugLog(`Removed ghost user: ${priorityQueue.items[i].element}`);
             removeFromQueue(priorityQueue.items[i].element);
         }
     }
+    debugLog(`Queue: ${priorityQueue.printQueue()}`);
 }, 15000);
-
-// debug function that prints the queue every 15 seconds
-if (config.debug) {
-    setInterval(function() {
-        console.log("[DEBUG] Queue: " + priorityQueue.printQueue());
-    }, 15000);
-}
 
 // Checks if the user is still in the queue
 function isUserInQueue(identifier) {
@@ -163,9 +126,7 @@ function addToQueue(identifier, src) {
             }
         }
         priorityQueue.insert(identifier, prio, src);
-        if (config.debug) {
-            console.log(`[DEBUG] ${identifier} has been added to the queue with priority ${prio}`);
-        }
+        debugLog(`${identifier} has been added to the queue with priority ${prio}`);
     });
 }
 
@@ -174,9 +135,7 @@ function removeFromQueue(identifier) {
     for (let i = 0; i < priorityQueue.items.length; i++) {
         if (priorityQueue.items[i].element == identifier) {
             priorityQueue.items.splice(i, 1);
-            if (config.debug) {
-                console.log(`[DEBUG] ${identifier} has been removed from the queue.`);
-            }
+            debugLog(`${identifier} has been removed from the queue.`);
             break;
         }
     }
@@ -203,17 +162,14 @@ function checkQueue(cb) {
 
 function graceListInsert(id) {
     graceList.push(id);
-    if (config.debug) {
-        console.log(`[DEBUG] ${id} has been added to the grace list.`);
-    }
+    debugLog(`${id} has been added to the grace list.`);
 }
+
 function graceListRemove(id) {
     for (let i = 0; i < graceList.length; i++) {
         if (graceList[i] == id) {
             graceList.splice(i, 1);
-            if (config.debug) {
-                console.log(`[DEBUG] ${discordIdentifier} has been removed from the grace list.`);
-            }
+            debugLog(`${discordIdentifier} has been removed from the grace list.`);
         }
     }
 }
@@ -297,7 +253,6 @@ class PriorityQueue {
 
 const priorityQueue = new PriorityQueue();
 
-// Updates the adaptive card content and sends a callback with said content so that it can be sent to the user
 function updateCard(callback) {
     const card = {
         "type": "AdaptiveCard",
@@ -394,4 +349,10 @@ function updateCard(callback) {
         "version": "1.3",
     };
     callback(card);
+}
+
+function debugLog(debugMessage) {
+    if (config.debug) {
+        utils.log.write(debugMessage, { tag: "QUEUE|DBG" });
+    }
 }

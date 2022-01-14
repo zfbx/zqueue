@@ -15,7 +15,6 @@ In the config file you will find three different sections the first being the se
 "settings": {
         "debug": false,
         "alwaysUse": false,
-        "noDiscordRejectMsg": "Change Me",
         "graceListTime": 5
     }
 ```
@@ -23,12 +22,10 @@ In the config file you will find three different sections the first being the se
 
 `alwaysUse` If set to true the queue will ALWAYS be used, regardless of the number of people in server, this will only allow one user to connect at a time. If set to false the queue will only take effect if there's < 5 open slots.
 
-`noDiscordRejectMsg` The message presented to a user when rejected for not having a Discord ID.
-
 `graceListTime` How long a user that has just disconnect/crashed has too reconnect before they will be put at the end of the queue again. (In minutes)
 
 
-The next section is for customizing the Adaptive Card UI presented to users while in the queue. Should be obvious what the different settings do, see the screenshot or the comments down below if you are still unsure. 
+The next section is for customizing the Adaptive Card UI presented to users while in the queue. Should be obvious what the different settings do, see the screenshot or the comments down below if you are still unsure.
 **Note: If you copy this over to your config file the comments MUST be removed**
 ```js
 "adaptiveCard": {
@@ -57,7 +54,7 @@ In the config file the individual roles are divided into categories, example con
 {
   "discordRoles": {
     "administration": {
-      "owner": "Discord Role ID", 
+      "owner": "Discord Role ID",
       "coOwner": "Discord Role ID",
       "headDev": "Disord Role ID"
     },
@@ -88,7 +85,7 @@ When sPerms builds the ``perms`` object it checks each individual role, but also
 ``prio`` This is the priority, the lower the number the higher the priority. (Use whole numbers)
 
 Here is an example for how you could set up the priority:
-```js 
+```js
 {
     "category": "administration",
     "role": "owner",
