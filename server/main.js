@@ -24,43 +24,35 @@ on("playerConnecting", async (name, setKickReason, deferrals) => {
         if (!isUserInQueue(discordIdentifier)) {
             return clearInterval(intervalId);
         }
-        checkQueue((cb) => {
-            if (cb == true) {
-                // Checks if there's more than 5 open slots
-                if (GetConvar("sv_maxclients") - GetNumPlayerIndices() > 4) {
-                    // checks if the alwaysUse setting is enabled
-                    if (config.alwaysUse) {
-                        // checks if the user is number 1 in the queue
-                        if (priorityQueue.front().element == discordIdentifier) {
-                            deferrals.done();
-                            console.log(`Connecting: ${name}`);
-                            clearInterval(intervalId);
-                        }
-                        else {
-                            msg = `You are in queue [${findInQueue(discordIdentifier) + 1}/${priorityQueue.items.length}]`;
-                            // call the function to update the adaptive card content
-                            updateCard(callback => {
-                                deferrals.presentCard(callback);
-                            });
-                        }
+        if (GetNumPlayerIndices() < GetConvar("sv_maxclients")) {
+            // Checks if there's more than 5 open slots
+            if (GetConvar("sv_maxclients") - GetNumPlayerIndices() > 4) {
+                // checks if the alwaysUse setting is enabled
+                if (config.alwaysUse) {
+                    // checks if the user is number 1 in the queue
+                    if (priorityQueue.front().element == discordIdentifier) {
+                        deferrals.done();
+                        console.log(`Connecting: ${name}`);
+                        clearInterval(intervalId);
                     }
                     else {
-                        // if there's more than 5 open slots and the alwaysUse setting is not disabled allow the user to connect without going through the queue
-                        deferrals.done();
+                        msg = `You are in queue [${findInQueue(discordIdentifier) + 1}/${priorityQueue.items.length}]`;
+                        // call the function to update the adaptive card content
+                        updateCard(callback => {
+                            deferrals.presentCard(callback);
+                        });
                     }
                 }
-                // checks if the user is number 1 in the queue
-                else if (priorityQueue.front().element == discordIdentifier) {
-                    deferrals.done();
-                    console.log(`Connecting: ${name}`);
-                    clearInterval(intervalId);
-                }
                 else {
-                    msg = `You are in queue [${findInQueue(discordIdentifier) + 1}/${priorityQueue.items.length}]`;
-                    updateCard(callback => {
-                        deferrals.presentCard(callback);
-                    });
+                    // if there's more than 5 open slots and the alwaysUse setting is not disabled allow the user to connect without going through the queue
+                    deferrals.done();
                 }
+            }
+            // checks if the user is number 1 in the queue
+            else if (priorityQueue.front().element == discordIdentifier) {
+                deferrals.done();
+                console.log(`Connecting: ${name}`);
+                clearInterval(intervalId);
             }
             else {
                 msg = `You are in queue [${findInQueue(discordIdentifier) + 1}/${priorityQueue.items.length}]`;
@@ -68,14 +60,21 @@ on("playerConnecting", async (name, setKickReason, deferrals) => {
                     deferrals.presentCard(callback);
                 });
             }
-        });
+        }
+        else {
+            msg = `You are in queue [${findInQueue(discordIdentifier) + 1}/${priorityQueue.items.length}]`;
+            updateCard(callback => {
+                deferrals.presentCard(callback);
+            });
+        }
     }, 500);
 });
 
 on("playerDropped", (reason) => {
     const src = global.source;
     const discordIdentifier = utils.getPlayerDiscordId(src);
-    graceListInsert(discordIdentifier);
+    graceList.push(id);
+    debugLog(`${id} has been added to the grace list.`);
     setTimeout(function() {
         graceListRemove(discordIdentifier);
     }, config.graceListTime * 60 * 1000);
@@ -111,25 +110,19 @@ function isUserInQueue(identifier) {
 
 // adds a user to the queue
 function addToQueue(identifier, src) {
-    emit("sPerms:getPerms", src, (perms) => {
-        userPerms = perms;
-        let prio = config.priorityList.length + 1;
-        for (let i = 0; i < config.priorityList.length; i++) {
-            const setup = config.priorityList[i];
-            if (userPerms[setup.category][setup.role]) {
-                prio = setup.prio;
-                break;
+    if (graceList.includes(identifier)) {
+        priorityQueue.insert(identifier, 1, src);
+        return debugLog(`${identifier} has been added to the queue with priority 1 for being on the grace list`);
+    }
+    const roles = global.exports.zdiscord.getRoles(identifier);
+    for (let i = 0; i < config.priorityList.length; i++) {
+        for (const role of config.priorityList.roles) {
+            if (roles.includes(role)) {
+                priorityQueue.insert(identifier, i, src);
+                return debugLog(`${identifier} has been added to the queue as ${config.priorityList[i].title} with priority ${i}`);
             }
         }
-        for (let i = 0; i < graceList.length; i++) {
-            if (graceList[i] == identifier) {
-                prio = 1;
-                break;
-            }
-        }
-        priorityQueue.insert(identifier, prio, src);
-        debugLog(`${identifier} has been added to the queue with priority ${prio}`);
-    });
+    }
 }
 
 // removes a user from the queue
@@ -150,21 +143,6 @@ function findInQueue(identifier) {
             return i;
         }
     }
-}
-
-// check if the server is full
-function checkQueue(cb) {
-    if (GetNumPlayerIndices() < GetConvar("sv_maxclients")) {
-        cb(true);
-    }
-    else {
-        cb(false);
-    }
-}
-
-function graceListInsert(id) {
-    graceList.push(id);
-    debugLog(`${id} has been added to the grace list.`);
 }
 
 function graceListRemove(id) {
@@ -188,68 +166,51 @@ class QElement {
 
 // PriorityQueue class
 class PriorityQueue {
-
-    // An array is used to implement priority
     constructor() {
         this.items = [];
     }
 
-    // insert function to add element to the queue as per priority
     insert(element, priority, source) {
-        // creating object from queue element
         const qElement = new QElement(element, priority, source);
-        let contain = false;
 
         // iterating through the entire item array to add element at the correct location of the Queue
         for (let i = 0; i < this.items.length; i++) {
             if (this.items[i].priority > qElement.priority) {
                 // Once the correct location is found it is inserted
                 this.items.splice(i, 0, qElement);
-                contain = true;
-                break;
+                return;
             }
         }
-
-        // if the element have the highest priority it is added at the end of the queue
-        if (!contain) {
-            this.items.push(qElement);
-        }
+        // default to end of queue
+        this.items.push(qElement);
     }
 
-    // remove method to remove element from the queue
+    // return the remove element and remove it. If the queue is empty returs UnderFlow
     remove() {
-        // return the remove element and remove it. If the queue is empty returs UnderFlow
-        if (this.isEmpty())
-        {return "UnderFlow";}
+        if (this.isEmpty()) return "UnderFlow";
         return this.items.shift();
     }
 
-    // front function
+    // returns the highest priority element in the priority queue wightout removing it
     front() {
-        // returns the highest priority element in the priority queue wightout removing it
-        if (this.isEmpty())
-        {return "No elements in Queue";}
+        if (this.isEmpty()) return "No elements in Queue";
         return this.items[0];
     }
 
-    // rear function
+    // returns the lowest priority element of the queue
     rear() {
-        // returns the lowest priority element of the queue
-        if (this.isEmpty())
-        {return "No elements in Queue";}
+        if (this.isEmpty()) return "No elements in Queue";
         return this.items[this.items.length - 1];
     }
-    // isEmpty function
+
+    // return true if the queue is empty.
     isEmpty() {
-        // return true if the queue is empty.
         return this.items.length == 0;
     }
-    // printQueue function prints all the elements of the queue
+
+    // print all the elements of the queue
     printQueue() {
-        let str = "";
-        for (let i = 0; i < this.items.length; i++)
-        {str += this.items[i].element + ", ";}
-        return str;
+        return this.items.join(", ");
     }
 }
 

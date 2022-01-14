@@ -1,4 +1,6 @@
-# zqueue (Priority queue for zdiscord)
+# zqueue
+
+### Priority queue for zdiscord
 
 This is a FiveM server queue with discord based priority built on [VikingTheDev](https://github.com/VikingTheDev/)'s pQueue work to support zdiscord instead.
 You **NEED** [zdiscord](https://github.com/zfbx/zdiscord) for this resource to work.

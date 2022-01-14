@@ -1,8 +1,11 @@
+// Log debug messages (joined queue, removed from queue, etc)
 const debug = false;
 
-const alwaysUse = false;
+// Use queue always (true) or only when server is at near capacity (false)
+const alwaysUse = true;
 
-const graceListTime = 2; // minutes
+// amount of time someone can rejoin without having to wait in queue again (for crashes)
+const graceListTime = 5; // minutes
 
 const adaptiveCard = {
     "card_title": "Title",
