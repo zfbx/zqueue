@@ -25,22 +25,7 @@ In the config file you will find three different sections the first being the se
 `graceListTime` How long a user that has just disconnect/crashed has too reconnect before they will be put at the end of the queue again. (In minutes)
 
 
-The next section is for customizing the Adaptive Card UI presented to users while in the queue. Should be obvious what the different settings do, see the screenshot or the comments down below if you are still unsure.
-**Note: If you copy this over to your config file the comments MUST be removed**
-```js
-"adaptiveCard": {
-        "card_title_isVisible": false, // decides whether the title is visible, defaults to false as you will most likely have your community name in the header.
-        "card_title": "Title", // the cards title, recommended use is for your community's name.
-        "card_header": "https://i.ibb.co/6DWQg68/dxIwJT3.png", // a link to the header picture
-        "card_description": "card description", // a short description can be used for messages such as "While you're waiting check out our Discord"
-        "button1_title": "Button 1", // The title for the first button
-        "button1_url": "https://discord.gg/ssrp", // The URL the first button should open.
-        "button2_title": "Button 2", // The title for the second button
-        "button2_url": "https://instagram.com/ssrp.leo/" // The URL the second button should open.
-    },
-```
 ![Alt text](https://i.ibb.co/7CT9rQK/Screenshot-29.png "Adaptive Card Layout")
-
 
 
 
@@ -83,29 +68,6 @@ When sPerms builds the ``perms`` object it checks each individual role, but also
 ``role`` If you are checking for a role, this should be the name of the role, ex. owner. If you are checking a whole category it should be the name of the category ex. staff.
 
 ``prio`` This is the priority, the lower the number the higher the priority. (Use whole numbers)
-
-Here is an example for how you could set up the priority:
-```js
-{
-    "category": "administration",
-    "role": "owner",
-    "prio": 1
-},
-{
-    "category": "category",
-    "role": "administration",
-    "prio": 2
-},
-{
-    "category": "category",
-    "role":  "staff",
-    "prio": 3
-}
-```
-**NOTE: Make sure you sort the priority from highest to lowest, if not the script might not use the highest priority if a user has multiple roles**
-
-Lastly, set ``defaultPrio`` to a higher number than all the priority roles/categories, in the last example it would be ``4`` or higher.
-
 
 If everything has been done correctly, the script should now work as intended. If you have any issues, feel free to reach out to me on Discord (MightyViking#9126)
 

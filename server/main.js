@@ -5,14 +5,16 @@ const config = require(`${GetResourcePath(GetCurrentResourceName())}/config`);
 const utils = require(`${GetResourcePath("zdiscord")}/server/utils`);
 
 StopResource("hardcap");
+StopResource("connectqueue");
 let msg;
 
 const graceList = [];
 
-on("playerConnecting", (name, setKickReason, deferrals) => {
+on("playerConnecting", async (name, setKickReason, deferrals) => {
     const src = global.source;
 
     deferrals.defer();
+    await utils.sleep(1);
     deferrals.update(`Hello ${name}. We're putting you in the loading queue`);
 
     const discordIdentifier = utils.getPlayerDiscordId(src);
@@ -111,9 +113,9 @@ function isUserInQueue(identifier) {
 function addToQueue(identifier, src) {
     emit("sPerms:getPerms", src, (perms) => {
         userPerms = perms;
-        let prio = config.defaultPrio;
-        for (let i = 0; i < config.priority_setup.length; i++) {
-            const setup = config.priority_setup[i];
+        let prio = config.priorityList.length + 1;
+        for (let i = 0; i < config.priorityList.length; i++) {
+            const setup = config.priorityList[i];
             if (userPerms[setup.category][setup.role]) {
                 prio = setup.prio;
                 break;
@@ -275,7 +277,7 @@ function updateCard(callback) {
                             "weight": "Bolder",
                             "color": "light",
                             "horizontalAlignment": "Center",
-                            "isVisible": config.adaptiveCard.card_title_isVisible,
+                            "isVisible": config.adaptiveCard.card_title !== "",
                         },
                         {
                             "type": "TextBlock",
