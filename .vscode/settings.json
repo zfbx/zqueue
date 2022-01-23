@@ -8,6 +8,7 @@
         "version",
         "server_script",
         "client_script",
-        "dependency"
+        "dependency",
+        "provide"
     ]
 }

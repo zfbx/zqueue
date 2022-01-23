@@ -73,8 +73,8 @@ on("playerConnecting", async (name, setKickReason, deferrals) => {
 on("playerDropped", (reason) => {
     const src = global.source;
     const discordIdentifier = utils.getPlayerDiscordId(src);
-    graceList.push(id);
-    debugLog(`${id} has been added to the grace list.`);
+    graceList.push(discordIdentifier);
+    debugLog(`${discordIdentifier} has been added to the grace list.`);
     setTimeout(function() {
         graceListRemove(discordIdentifier);
     }, config.graceListTime * 60 * 1000);
@@ -116,7 +116,7 @@ function addToQueue(identifier, src) {
     }
     const roles = global.exports.zdiscord.getRoles(identifier);
     for (let i = 0; i < config.priorityList.length; i++) {
-        for (const role of config.priorityList.roles) {
+        for (const role of config.priorityList[i].roles) {
             if (roles.includes(role)) {
                 priorityQueue.insert(identifier, i, src);
                 return debugLog(`${identifier} has been added to the queue as ${config.priorityList[i].title} with priority ${i}`);
@@ -227,81 +227,75 @@ function updateCard(callback) {
             },
             {
                 "type": "Container",
-                "items":
-                    [
-                        {
-                            "type": "TextBlock",
-                            "text": config.adaptiveCard.card_title,
-                            "wrap": true,
-                            "fontType": "Default",
-                            "size": "ExtraLarge",
-                            "weight": "Bolder",
-                            "color": "light",
-                            "horizontalAlignment": "Center",
-                            "isVisible": config.adaptiveCard.card_title !== "",
-                        },
-                        {
-                            "type": "TextBlock",
-                            "text": msg,
-                            "wrap": true,
-                            "size": "Large",
-                            "weight": "Bolder",
-                            "color": "Light",
-                            "horizontalAlignment": "Center",
-                        },
-                        {
-                            "type": "TextBlock",
-                            "text": config.adaptiveCard.card_description,
-                            "wrap": true,
-                            "color": "Light", "size": "Medium",
-                            "horizontalAlignment": "Center",
-                        },
-                        {
-                            "type": "ColumnSet", "height": "stretch",
-                            "minHeight": "35px", "bleed": true,
-                            "horizontalAlignment": "Center",
-                            "columns":
-                                [
+                "items": [
+                    {
+                        "type": "TextBlock",
+                        "text": config.adaptiveCard.card_title,
+                        "wrap": true,
+                        "fontType": "Default",
+                        "size": "ExtraLarge",
+                        "weight": "Bolder",
+                        "color": "light",
+                        "horizontalAlignment": "Center",
+                        "isVisible": config.adaptiveCard.card_title !== "",
+                    },
+                    {
+                        "type": "TextBlock",
+                        "text": msg,
+                        "wrap": true,
+                        "size": "Large",
+                        "weight": "Bolder",
+                        "color": "Light",
+                        "horizontalAlignment": "Center",
+                    },
+                    {
+                        "type": "TextBlock",
+                        "text": config.adaptiveCard.card_description,
+                        "wrap": true,
+                        "color": "Light", "size": "Medium",
+                        "horizontalAlignment": "Center",
+                    },
+                    {
+                        "type": "ColumnSet", "height": "stretch",
+                        "minHeight": "35px", "bleed": true,
+                        "horizontalAlignment": "Center",
+                        "columns": [
+                            {
+                                "type": "Column",
+                                "width": "stretch",
+                                "items": [
                                     {
-                                        "type": "Column",
-                                        "width": "stretch",
-                                        "items":
-                                            [
-                                                {
-                                                    "type": "ActionSet",
-                                                    "actions":
-                                                        [
-                                                            {
-                                                                "type": "Action.OpenUrl",
-                                                                "title": config.adaptiveCard.button1_title,
-                                                                "style": "positive",
-                                                            },
-                                                        ],
-                                                },
-                                            ],
-                                        "height": "stretch",
-                                    },
-                                    {
-                                        "type": "Column", "width": "stretch",
-                                        "items":
-                                            [
-                                                {
-                                                    "type": "ActionSet",
-                                                    "actions":
-                                                        [
-                                                            {
-                                                                "type": "Action.OpenUrl",
-                                                                "title": config.adaptiveCard.button2_title,
-                                                                "style": "positive",
-                                                                "url": config.adaptiveCard.button2_url,
-                                                            },
-                                                        ],
-                                                },
-                                            ],
+                                        "type": "ActionSet",
+                                        "actions": [
+                                            {
+                                                "type": "Action.OpenUrl",
+                                                "title": config.adaptiveCard.button1_title,
+                                                "style": "positive",
+                                            },
+                                        ],
                                     },
                                 ],
-                        },
-                    ],
+                                "height": "stretch",
+                            },
+                            {
+                                "type": "Column", "width": "stretch",
+                                "items": [
+                                    {
+                                        "type": "ActionSet",
+                                        "actions": [
+                                            {
+                                                "type": "Action.OpenUrl",
+                                                "title": config.adaptiveCard.button2_title,
+                                                "style": "positive",
+                                                "url": config.adaptiveCard.button2_url,
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                ],
                 "style": "default",
                 "bleed": true,
                 "height": "automatic",
@@ -316,6 +310,6 @@ function updateCard(callback) {
 
 function debugLog(debugMessage) {
     if (config.debug) {
-        utils.log.write(debugMessage, { tag: "QUEUE|DBG" });
+        utils.log.write(debugMessage, { tag: "DBG" });
     }
 }

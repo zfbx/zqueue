@@ -50,7 +50,7 @@ const priorityList = [ // Order defines priority
 module.exports = {
     debug: getConBool("zqueue_debug", debug),
     alwaysUse: getConBool("zqueue_alwaysuse", alwaysUse),
-    graceListTime: getConvarInt("zqueue_gracetime", graceListTime),
+    graceListTime: graceListTime,
     adaptiveCard: adaptiveCard,
     priorityList: priorityList,
 };

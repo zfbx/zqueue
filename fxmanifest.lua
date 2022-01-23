@@ -10,3 +10,4 @@ server_script 'server/**'
 client_script 'client/**'
 
 dependency 'zdiscord'
+provide 'connectqueue'

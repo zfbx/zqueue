@@ -1,4 +1,4 @@
-# zqueue
+# zqueue (WIP DON'T USE)
 
 ### Priority queue for zdiscord
 
