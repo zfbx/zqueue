@@ -149,7 +149,7 @@ function graceListRemove(id) {
     for (let i = 0; i < graceList.length; i++) {
         if (graceList[i] == id) {
             graceList.splice(i, 1);
-            debugLog(`${discordIdentifier} has been removed from the grace list.`);
+            debugLog(`${id} has been removed from the grace list.`);
         }
     }
 }
